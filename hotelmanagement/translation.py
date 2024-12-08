@@ -1,6 +1,17 @@
-from .models import Hotel
-from modeltranslation.translator import TranslationOptions,register
+from modeltranslation.translator import register, TranslationOptions
+from .models import Hotel, Room, Review
+
 
 @register(Hotel)
-class ProductTranslationOptions(TranslationOptions):
-    fields = ('name', 'description')
+class HotelTranslationOptions(TranslationOptions):
+    fields = ('name', 'description', 'address')
+
+
+@register(Room)
+class RoomTranslationOptions(TranslationOptions):
+    fields = ('number', 'status')
+
+
+@register(Review)
+class ReviewTranslationOptions(TranslationOptions):
+    fields = ('comment',)

@@ -1,12 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 class User(AbstractUser):
     ROLES = [
         ('client', 'Client'),
         ('hotel_owner', 'Hotel Owner'),
     ]
     role = models.CharField(max_length=20, choices=ROLES)
+
 
 class Hotel(models.Model):
     name = models.CharField(max_length=32)
@@ -18,8 +20,10 @@ class Hotel(models.Model):
     def __str__(self):
         return self.name
 
+
 class HotelPhoto(models.Model):
     image = models.ImageField(upload_to='hotel_photos/')
+
 
 class Room(models.Model):
     STATUS_CHOICES = [
@@ -33,10 +37,8 @@ class Room(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-
-def __str__(self):
-    return f"Room {self.number} at {self.hotel.name}, Status: {self.status}, Price: {self.price}"
-
+    def __str__(self):
+        return f"Room {self.number} at {self.hotel.name}, Status: {self.status}, Price: {self.price}"
 
 
 class Booking(models.Model):
@@ -46,9 +48,19 @@ class Booking(models.Model):
     end_date = models.DateField()
     status = models.CharField(max_length=20, choices=[('booked', 'Booked'), ('cancelled', 'Cancelled')])
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.room.status = 'booked'
+            self.room.save()
+        super().save(*args, **kwargs)
+
+    def cancel(self):
+        self.room.status = 'available'
+        self.room.save()
+        self.delete()
+
     def __str__(self):
         return f"Booking for {self.room} by {self.user} from {self.start_date} to {self.end_date}"
-
 
 
 class Review(models.Model):
